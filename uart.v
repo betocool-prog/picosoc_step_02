@@ -67,24 +67,17 @@ module uart (
     rd_ready <= 0;
     reg_do <= 32'h 0000_0000;
 
-    if((reg_re != 4'b 0000) && (reg_addr == 4'b 0000)) begin
-        reg_do <= cfg_reg;
-        rd_ready <= 1;
-    end
+    if(ren) begin
 
-    if((reg_re != 4'b 0000) && (reg_addr == 4'b 0001)) begin
-        reg_do <= clk_div_reg;
-        rd_ready <= 1;
-    end
+      case(reg_addr)
+        4'b 0000: reg_do <= cfg_reg;
+        4'b 0001: reg_do <= clk_div_reg;
+        4'b 0010: reg_do <= usr_reg;
+        4'b 0100: reg_do <= rx_reg;
+        default: reg_do <= 32'h 0000_0000;
+      endcase
 
-    if((reg_re != 4'b 0000) && (reg_addr == 4'b 0010)) begin
-        reg_do <= usr_reg;
-        rd_ready <= 1;
-    end
-
-    if((reg_re != 4'b 0000) && (reg_addr == 4'b 0100)) begin
-        reg_do <= rx_reg;
-        rd_ready <= 1;
+      rd_ready <= 1;
     end
 
     if(!resetn) begin

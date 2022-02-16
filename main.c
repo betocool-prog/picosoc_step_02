@@ -51,15 +51,15 @@ void main()
     counter_presc_reg = (100000000/1000) - 1;
     counter_cfg_reg = 0x1;
 
+    uart_cfg_reg = 0xDEADBEEF;
+    uart_clk_div_reg = 0xC00FFEE;
+    uart_usr_reg = 0xB00710AD;
+    uart_tx_reg = 0xD15EA5E5;
+
     temp[0] = uart_cfg_reg;
     temp[1] = uart_clk_div_reg;
-    temp[2] = uart_usr_reg;
     temp[3] = uart_rx_reg;
-
-    uart_cfg_reg = 0xDEADBEEF;
-    uart_clk_div_reg = 0xDEADBEEF;
-    uart_usr_reg = 0xDEADBEEF;
-    uart_tx_reg = 0xDEADBEEF;
+    temp[2] = uart_usr_reg;
 
     last_time_ms = 0;
 
