@@ -1,0 +1,49 @@
+[*]
+[*] GTKWave Analyzer v3.3.103 (w)1999-2019 BSI
+[*] Wed Feb 16 13:20:00 2022
+[*]
+[dumpfile] "/home/betocool/Projects/symbiflow-examples/xc7/picosoc_step_02/waveform.vcd"
+[dumpfile_mtime] "Wed Feb 16 13:15:33 2022"
+[dumpfile_size] 361131627
+[savefile] "/home/betocool/Projects/symbiflow-examples/xc7/picosoc_step_02/waveform.gtkw"
+[timestart] 0
+[size] 1920 1016
+[pos] -1 -1
+*-19.450270 94705 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.top.
+[treeopen] TOP.top.soc.
+[treeopen] TOP.top.soc.cpu.
+[treeopen] TOP.top.soc.cpu.genblk2.genblk1.
+[treeopen] TOP.top.soc.uart.
+[sst_width] 221
+[signals_width] 250
+[sst_expanded] 1
+[sst_vpaned_height] 298
+@22
+TOP.top.soc.iomem_addr[31:0]
+@200
+-
+@28
+TOP.top.soc.simplecounter.cnt_clk
+@22
+TOP.top.soc.simplecounter.cnt_reg[31:0]
+@28
+TOP.top.soc.simplecounter.presc_clk
+@22
+TOP.top.soc.simplecounter.presc_cnt[31:0]
+TOP.top.soc.simplecounter.presc_reg[31:0]
+@200
+-
+@22
+TOP.top.soc.uart.reg_do[31:0]
+TOP.top.soc.uart.rx_reg[31:0]
+TOP.top.soc.uart.cfg_reg[31:0]
+TOP.top.soc.uart.clk_div_reg[31:0]
+TOP.top.soc.uart.usr_reg[31:0]
+@23
+TOP.top.soc.uart.tx_reg[31:0]
+@200
+-
+[pattern_trace] 1
+[pattern_trace] 0

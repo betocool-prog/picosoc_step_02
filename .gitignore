@@ -1,0 +1,9 @@
+build
+obj_dir
+__pycache__
+progmem.v
+waveform.vcd
+*.map
+*.elf
+*.bin
+main.lds
