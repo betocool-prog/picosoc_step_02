@@ -98,6 +98,6 @@ module bufg_opt (
 );
 
 	always @* begin
-		dat_out <= dat_in;
+		dat_out = dat_in;
 	end
 endmodule

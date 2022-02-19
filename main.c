@@ -38,7 +38,7 @@
 /* Private functions */
 static void led_counter(void);
 static uint32_t get_time_ms(void);
-static volatile uint32_t temp[4] = {0};
+static volatile uint32_t temp;
 
 /* Private variables */
 static uint32_t last_time_ms;
@@ -51,15 +51,17 @@ void main()
     counter_presc_reg = (100000000/1000) - 1;
     counter_cfg_reg = 0x1;
 
-    uart_cfg_reg = 0xDEADBEEF;
-    uart_clk_div_reg = 0xC00FFEE;
-    uart_usr_reg = 0xB00710AD;
-    uart_tx_reg = 0xD15EA5E5;
+    uint32_t idx = 0;
 
-    temp[0] = uart_cfg_reg;
-    temp[1] = uart_clk_div_reg;
-    temp[3] = uart_rx_reg;
-    temp[2] = uart_usr_reg;
+    for(idx = 0; idx < 260; idx++)
+    {
+        uart_tx_reg = idx;
+    }
+
+    for(idx = 0; idx < 0x10; idx++)
+    {
+        temp = uart_rx_reg;
+    }
 
     last_time_ms = 0;
 

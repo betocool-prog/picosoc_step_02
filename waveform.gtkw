@@ -1,13 +1,13 @@
 [*]
 [*] GTKWave Analyzer v3.3.103 (w)1999-2019 BSI
-[*] Wed Feb 16 14:02:04 2022
+[*] Sat Feb 19 07:30:49 2022
 [*]
 [dumpfile] "(null)"
 [savefile] "/home/betocool/Projects/symbiflow-examples/xc7/picosoc_step_02/waveform.gtkw"
-[timestart] 97292
+[timestart] 0
 [size] 1920 1016
 [pos] -1 -1
-*-7.450270 94482 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-19.450270 247086 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.top.
 [treeopen] TOP.top.soc.
@@ -36,7 +36,6 @@ TOP.top.soc.simplecounter.presc_reg[31:0]
 @28
 TOP.top.soc.uart.clk
 TOP.top.soc.uart.ren
-@29
 TOP.top.soc.uart.wen
 @22
 TOP.top.soc.uart.reg_addr[3:0]
@@ -48,5 +47,33 @@ TOP.top.soc.uart.usr_reg[31:0]
 TOP.top.soc.uart.tx_reg[31:0]
 @200
 -
+@22
+TOP.top.soc.uart.tx_fifo.fifo_level[7:0]
+@28
+TOP.top.soc.uart.tx_fifo.fifo_full
+TOP.top.soc.uart.tx_fifo.fifo_empty
+TOP.top.soc.uart.tx_wr_ready
+TOP.top.soc.uart.tx_fifo.prev_wen
+TOP.top.soc.uart.tx_fifo.wen
+@22
+TOP.top.soc.uart.tx_fifo.wdata[7:0]
+TOP.top.soc.uart.tx_fifo.wr_addr[7:0]
+@28
+TOP.top.soc.uart.tx_fifo.prev_ren
+TOP.top.soc.uart.tx_fifo.ren
+@200
+-
+@28
+TOP.top.soc.uart.rx_fifo.clk
+TOP.top.soc.uart.rx_fifo.ren
+TOP.top.soc.uart.rd_ready
+TOP.top.soc.uart.rx_fifo.prev_ren
+@22
+TOP.top.soc.uart.reg_do[31:0]
+@23
+TOP.top.soc.uart.rx_wire[7:0]
+@22
+TOP.top.soc.uart.rx_fifo.rd_addr[7:0]
+TOP.top.soc.uart.rx_fifo.rdata[7:0]
 [pattern_trace] 1
 [pattern_trace] 0

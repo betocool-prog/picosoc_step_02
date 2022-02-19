@@ -51,18 +51,18 @@ module simplecounter (
 
   always @(*) begin
     if (reg_re != 4'b 0000) begin
-      rd_ready <= 1;
+      rd_ready = 1;
 
       case(reg_addr)
-        4'b 0000: reg_do <= cfg_reg;
-        4'b 0001: reg_do <= presc_reg;
-        4'b 0010: reg_do <= cnt_reg;
-        default: reg_do <= 32'h 0000_0000;
+        4'b 0000: reg_do = cfg_reg;
+        4'b 0001: reg_do = presc_reg;
+        4'b 0010: reg_do = cnt_reg;
+        default: reg_do = 32'h 0000_0000;
       endcase
 
     end else begin
-      rd_ready <= 0;
-      reg_do <= 32'h 0000_0000;
+      rd_ready = 0;
+      reg_do = 32'h 0000_0000;
     end
   end
 

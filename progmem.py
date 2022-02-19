@@ -23,7 +23,7 @@ try:
     with open('progmem.v', 'w') as prog_mem_file:
 
         for value in hex_values:
-            progmem_text += f"    mem[\'h{addr:04X}] <= 32\'h{value:08X};\n"
+            progmem_text += f"    mem[\'h{addr:04X}] = 32\'h{value:08X};\n"
             addr += 1
     
 
