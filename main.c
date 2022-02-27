@@ -38,10 +38,9 @@
 /* Private functions */
 static void led_counter(void);
 static uint32_t get_time_ms(void);
-static volatile uint32_t temp;
+static void print_char(void);
 
 /* Private variables */
-static uint32_t last_time_ms;
 
 void main()
 {
@@ -53,26 +52,20 @@ void main()
 
     uint32_t idx = 0;
 
-    for(idx = 0; idx < 260; idx++)
-    {
-        uart_tx_reg = idx;
-    }
-
-    for(idx = 0; idx < 0x10; idx++)
-    {
-        temp = uart_rx_reg;
-    }
-
-    last_time_ms = 0;
+    /* Set UART division */
+    uart_clk_div_reg = 100000000 / 115200;
 
 	while (1)
 	{
 		led_counter();
+        print_char();
 	}
 }
 
 static void led_counter(void)
 {
+
+    static uint32_t last_time_ms = 0;
 
     if(20 <= (get_time_ms() - last_time_ms))
     {
@@ -82,6 +75,25 @@ static void led_counter(void)
             reg_leds = 0;
         }
     }
+}
+
+static void print_char(void)
+{
+
+    static uint32_t last_time_ms = 0;
+    static uint8_t ascii_char = 0x20;
+   
+    if(250 <= (get_time_ms() - last_time_ms))
+    {
+        last_time_ms = get_time_ms();
+        
+        uart_tx_reg = ascii_char;
+        
+        if(0x80 == ++ascii_char)
+        {
+            ascii_char = 0x20;
+        }
+    } 
 }
 
 static uint32_t get_time_ms(void)

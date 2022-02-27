@@ -2,6 +2,7 @@ current_dir := ${CURDIR}
 TOP := top
 SOURCES := ${current_dir}/picosoc_noflash.v \
            ${current_dir}/picorv32.v \
+		   ${current_dir}/sync_edge_detect.v \
            ${current_dir}/uart.v \
            ${current_dir}/simplecounter.v \
            ${current_dir}/progmem.v
