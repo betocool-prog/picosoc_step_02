@@ -5,8 +5,9 @@
 
 // Create an instance of our module under test
 
-#define CLK_PERIOD	10.0f // Clock period in ns
-#define MAX_SIM_TIME 5 * (0.001f * 1e9) // Simulation time in ms
+#define CLK_PERIOD		10.0f // Clock period in ns
+#define MAX_SIM_TIME 	32 * (0.001f * 1e9) // Simulation time in ms
+#define MS_TICK 		(0.001f * 1e9) // Simulation time in ms
 
 int main(int argc, char **argv)
 {
@@ -23,8 +24,17 @@ int main(int argc, char **argv)
 	{
 		tb->top__02Eclk ^= 1;
 		tb->eval();
-		m_trace->dump(m_timestamp);
+		
+		if(m_timestamp >= 0 * MS_TICK)
+		{
+			if(m_timestamp <= 10 * MS_TICK)
+			{
+				m_trace->dump(m_timestamp);
+			}
+		}
+		
 		m_timestamp += CLK_PERIOD / 2;
+		// tb->rx = tb->tx;
 	}
 
     m_trace->close();

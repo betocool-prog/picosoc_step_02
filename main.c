@@ -38,7 +38,8 @@
 /* Private functions */
 static void led_counter(void);
 static uint32_t get_time_ms(void);
-static void print_char(void);
+static void print_char(char out_data);
+static bool read_char(volatile char* data_in);
 
 /* Private variables */
 
@@ -46,6 +47,7 @@ void main()
 {
 
 	reg_leds = 0x0;
+    static volatile char in_char = 0;
 
     counter_presc_reg = (100000000/1000) - 1;
     counter_cfg_reg = 0x1;
@@ -58,7 +60,12 @@ void main()
 	while (1)
 	{
 		led_counter();
-        print_char();
+
+        if(read_char(&in_char))
+        {
+            print_char(in_char);
+        }
+
 	}
 }
 
@@ -77,23 +84,26 @@ static void led_counter(void)
     }
 }
 
-static void print_char(void)
+static bool read_char(volatile char* data_in)
 {
-
-    static uint32_t last_time_ms = 0;
-    static uint8_t ascii_char = 0x20;
-   
-    if(250 <= (get_time_ms() - last_time_ms))
+    bool retval = false;
+    
+    if((uart_usr_reg & 0x8) == 0) //Rx fifo not empty
     {
-        last_time_ms = get_time_ms();
-        
-        uart_tx_reg = ascii_char;
-        
-        if(0x80 == ++ascii_char)
-        {
-            ascii_char = 0x20;
-        }
-    } 
+        *data_in = uart_rx_reg;
+        retval = true;
+    }
+    else
+    {
+        retval = false;
+    }
+
+    return retval;
+}
+
+static void print_char(char out_data)
+{        
+    uart_tx_reg = out_data;
 }
 
 static uint32_t get_time_ms(void)

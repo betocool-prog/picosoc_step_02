@@ -83,6 +83,9 @@ module uart (
 
   /* Read Section */
   /* Read Data Register */
+
+  wire rx_fifo_rd_rdy;
+
   always @(posedge clk) begin
 
     rd_ready <= 0;
@@ -92,21 +95,21 @@ module uart (
     if(ren) begin
 
       case(reg_addr)
-        4'b 0000: begin
+        4'b 0000: begin           // Config register
           reg_do <= cfg_reg;
           rd_ready <= 1;
         end
-        4'b 0001: begin
+        4'b 0001: begin           // Clock division regiser
           reg_do <= clk_div_reg;
           rd_ready <= 1;
         end
         4'b 0010: begin
-          reg_do <= usr_reg;
+          reg_do <= usr_reg;      // UART Status register
           rd_ready <= 1;
         end
         4'b 0100: begin
-          reg_do <= (32'h 0000_0000 | rx_wire);
-          rd_ready <= 1;
+          reg_do <= (32'h 0000_0000 | rx_wire); // Read data register
+          rd_ready <= rx_fifo_rd_rdy;
           rx_rd_fifo <= 1;
         end
         default: reg_do <= 32'h 0000_0000;
@@ -122,6 +125,9 @@ module uart (
 
   /* Write Data Section */
   /* Write registers  */
+
+  wire tx_fifo_wr_rdy;
+
   always @(posedge clk) begin
 
     cfg_wr_ready <= 0;
@@ -132,20 +138,20 @@ module uart (
     if(wen) begin
       case(reg_addr)
         4'b 0000: begin
-          cfg_reg <= reg_di;
+          cfg_reg <= reg_di;  // Config register
           cfg_wr_ready <= 1;
         end
         4'b 0001: begin
-          clk_div_reg <= reg_di;
+          clk_div_reg <= reg_di;  // Clock div register
           clk_div_wr_ready <= 1;
         end
         4'b 0011: begin
-          tx_reg <= reg_di;
-          tx_wr_ready <= 1;
+          tx_reg <= reg_di;       // Tx fifo register
+          tx_wr_ready <= tx_fifo_wr_rdy;
           tx_wr_fifo <= 1;
         end
         default: begin
-          cfg_reg <= cfg_reg;
+          cfg_reg <= cfg_reg;   
           clk_div_reg <= clk_div_reg;
           tx_reg <= tx_reg;
         end
@@ -187,65 +193,125 @@ module uart (
   /* TX Fifo to serial
     UART output
     Start bit - 0
-    Bits 0- 7
+    Bits 0 - 7
     Stop bit - 1
   */
-  localparam UART_IDLE = 2'b00;
-  localparam UART_START = 2'b01;
-  localparam UART_DATA = 2'b10;
-  localparam UART_STOP = 2'b11;
-  reg [1:0] uart_state;
-  reg [7:0] uart_out_reg;
-  reg [2:0] uart_bits_out;
+  localparam TX_UART_IDLE = 2'b00;
+  localparam TX_UART_START = 2'b01;
+  localparam TX_UART_DATA = 2'b10;
+  localparam TX_UART_STOP = 2'b11;
+  reg [1:0] tx_uart_state;
+  reg [7:0] tx_uart_out_reg;
+  reg [2:0] tx_uart_bits_out;
+  reg tx_fifo_rd_rdy;
 
   always @(posedge uart_clk) begin
 
     uart_tx <= 1;
     tx_rd_fifo <= 0;
 
-    case(uart_state)
+    case(tx_uart_state)
       
-      UART_IDLE: begin
-        uart_bits_out <= 3'b000;
-        uart_state <= UART_IDLE;
+      TX_UART_IDLE: begin
+        tx_uart_bits_out <= 3'b000;
+        tx_uart_state <= TX_UART_IDLE;
 
         if(!tx_fifo_empty) begin
-          uart_state <= UART_START;
+          tx_uart_state <= TX_UART_START;
           tx_rd_fifo <= 1;
         end
         
       end
 
-      UART_START: begin
+      TX_UART_START: begin
         uart_tx <= 0;
-        uart_out_reg <= tx_output_reg;
-        uart_state <= UART_DATA;
+        tx_uart_out_reg <= tx_output_reg;
+        tx_uart_state <= TX_UART_DATA;
       end
 
-      UART_DATA: begin
-        uart_out_reg[6:0] <= uart_out_reg[7:1];
-        uart_tx <= uart_out_reg[0];
-        uart_bits_out <= uart_bits_out + 1;
+      TX_UART_DATA: begin
+        tx_uart_out_reg[6:0] <= tx_uart_out_reg[7:1];
+        uart_tx <= tx_uart_out_reg[0];
+        tx_uart_bits_out <= tx_uart_bits_out + 1;
 
-        if(uart_bits_out == 7) begin
-          uart_state <= UART_STOP;
+        if(tx_uart_bits_out == 7) begin
+          tx_uart_state <= TX_UART_STOP;
         end
 
       end
 
-      UART_STOP: begin
+      TX_UART_STOP: begin
         uart_tx <= 1;    
-        uart_state <= UART_IDLE;    
+        tx_uart_state <= TX_UART_IDLE;    
       end
       
     endcase
 
-    /* Update uart_out_reg if fifo is not empty */
+    /* Update tx_uart_out_reg if fifo is not empty */
     
     if(!resetn) begin
-      uart_out_reg <= 10'h 3FF;
+      tx_uart_out_reg <= 10'h 3FF;
     end
   end
+
+
+
+  /* Serial RX to fifo
+    UART input
+    Start bit - 0
+    Bits 0 - 7
+    Stop bit - 1
+  */
+
+  localparam RX_UART_IDLE = 2'b00;
+  localparam RX_UART_START = 2'b01;
+  localparam RX_UART_DATA = 2'b10;
+  localparam RX_UART_STOP = 2'b11;
+  reg [1:0] rx_uart_state;
+  reg [7:0] rx_uart_in_reg;
+  reg [2:0] rx_uart_bits_in;
+
+  always @(posedge uart_clk) begin
+
+    rx_wr_fifo <= 0;
+
+    case(rx_uart_state)
+      
+      RX_UART_IDLE: begin
+        if(uart_rx == 0) begin
+          rx_uart_state <= RX_UART_DATA;
+          rx_uart_in_reg <= 8'h 00;
+          rx_uart_bits_in <= 3'h 0;
+        end
+      end
+
+      RX_UART_START: begin
+        rx_uart_state <= RX_UART_DATA;
+      end
+
+      RX_UART_DATA: begin
+
+        rx_uart_in_reg[7] <= uart_rx;
+        rx_uart_in_reg[6:0] <= rx_uart_in_reg[7:1];
+        rx_uart_bits_in <= rx_uart_bits_in + 1;
+
+        if(rx_uart_bits_in == 7) begin
+          rx_uart_state <= RX_UART_STOP;
+        end
+
+      end
+      
+      RX_UART_STOP: begin
+        if (uart_rx == 1) begin
+          rx_input_reg <= rx_uart_in_reg;
+          rx_wr_fifo <= 1;
+          rx_uart_state <= RX_UART_IDLE;
+        end
+      end
+
+    endcase
+  end
+
 
   /* Tx Fifo */
 	uart_fifo tx_fifo (
@@ -257,7 +323,9 @@ module uart (
 		.wdata	  (tx_reg[7:0]),
 		.rdata	  (tx_output_reg),
 		.full		  (tx_fifo_full),
-		.empty	  (tx_fifo_empty)
+		.empty	  (tx_fifo_empty),
+    .wr_ready (tx_fifo_wr_rdy),
+    .rd_ready (tx_fifo_rd_rdy)
 	);
 
   /* Rx Fifo */
@@ -270,7 +338,9 @@ module uart (
 		.wdata	  (rx_input_reg),
 		.rdata	  (rx_wire),
 		.full		  (rx_fifo_full),
-		.empty	  (rx_fifo_empty)
+		.empty	  (rx_fifo_empty),
+    // .wr_ready (rx_fifo_wr_rdy),
+    .rd_ready (rx_fifo_rd_rdy)
 	);
 
 endmodule
@@ -285,7 +355,9 @@ module uart_fifo #(
 	input [7:0] wdata,
 	output reg [7:0] rdata,
   output full,
-  output empty
+  output empty,
+  output reg wr_ready,
+  output reg rd_ready
 );
 	(* ram_style = "distributed" *) reg [7:0] fifo [0:WORDS-1];
   
@@ -300,7 +372,7 @@ module uart_fifo #(
   initial begin
     wr_addr = 8'h 00;
     rd_addr = 8'h 00;
-    fifo_level = 8'h 0F;
+    fifo_level = 8'h 00;
     fifo_full = 0;
     fifo_empty = 1;
     prev_wen = 0;
@@ -318,22 +390,25 @@ module uart_fifo #(
     rd_addr <= rd_addr;
     prev_wen <= wen;
     prev_ren <= ren;
+    wr_ready <= 0;
+    rd_ready <= 1;
+    rdata <= rdata;
 
     if (ren & !prev_ren) begin
       if (!fifo_empty) begin
         fifo_level <= fifo_level - 1;
         rd_addr <= rd_addr + 1;
         rdata <= fifo[rd_addr];
+        rd_ready <= 1;
       end
     end
 
-		if (wen) begin
+		if (wen & !prev_wen) begin
       if(!fifo_full) begin
         fifo[wr_addr][7:0] <= wdata[7:0];
-        if(prev_wen) begin
-          fifo_level <= fifo_level + 1;
-          wr_addr <= wr_addr + 1;
-        end
+        fifo_level <= fifo_level + 1;
+        wr_addr <= wr_addr + 1;
+        wr_ready <= 1;
       end
     end
 
