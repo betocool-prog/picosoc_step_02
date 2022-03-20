@@ -251,6 +251,7 @@ module uart (
     
     if(!resetn) begin
       tx_uart_out_reg <= 10'h 3FF;
+      tx_uart_state <= TX_UART_IDLE;
     end
   end
 
@@ -391,7 +392,7 @@ module uart_fifo #(
     prev_wen <= wen;
     prev_ren <= ren;
     wr_ready <= 0;
-    rd_ready <= 1;
+    rd_ready <= 0;
     rdata <= rdata;
 
     if (ren & !prev_ren) begin
@@ -405,7 +406,7 @@ module uart_fifo #(
 
 		if (wen & !prev_wen) begin
       if(!fifo_full) begin
-        fifo[wr_addr][7:0] <= wdata[7:0];
+        fifo[wr_addr] <= wdata;
         fifo_level <= fifo_level + 1;
         wr_addr <= wr_addr + 1;
         wr_ready <= 1;
